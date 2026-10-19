@@ -112,6 +112,25 @@ dotnet publish Emby.SubtitleCat/Emby.SubtitleCat.csproj -c Release -o out
 
 产物为 `out/Emby.SubtitleCat.dll`，连同 `Emby.SubtitleCat.pdb` 打包成 zip 即可分发。
 
+## 联动项目
+
+本插件与 MetaTube 的两个仓库联动，地址如下：
+
+| 项目 | 角色 | 地址 |
+| --- | --- | --- |
+| metatube-sdk-go | 刮削服务端，提供元数据与图片处理 API | https://github.com/Ming0feng/metatube-sdk-go |
+| jellyfin-plugin-metatube | Jellyfin / Emby 刮削插件，写入 `MetaTube` ProviderId，并生成本插件复用的图片接口配置 | https://github.com/Ming0feng/jellyfin-plugin-metatube |
+| emby-subtitlecat | 本插件：Emby 字幕下载与后处理 | https://github.com/Ming0feng/emby-subtitlecat |
+
+联动方式：
+
+1. 刮削成功后，MetaTube 插件把结果写入 `ProviderIds["MetaTube"]`，值为 `<Provider>:<Id>[:<Position>[:<Update>]]`。本插件据此判断条目已刮削（自动下载触发条件、全库扫描过滤条件），并解析出番号。
+2. 番号可信度顺序为：MetaTube ProviderId → 条目名（元数据） → 文件路径；文件命名错误时仍可回退到元数据番号。
+3. 字幕下载并刷新媒体信息后，本插件读取 Emby 配置目录下的 `MetaTube.json`（由 MetaTube 插件生成），取 `Server` 与角标相关配置，调用 `/v1/images/primary/{provider}/{id}` 重设主图，补上「中文字幕」/「无码破解」角标。
+4. 若未安装 MetaTube 插件或未开启角标，则只做字幕下载，跳过角标步骤。
+
+三者需指向同一个 MetaTube Server 实例。
+
 ## 兼容性
 
 - 目标框架：`net6.0`（Emby 4.8 / 4.9 运行时为 .NET 6）
