@@ -3,6 +3,8 @@ using System.ComponentModel;
 #if __EMBY__
 using Emby.Web.GenericEdit;
 using MediaBrowser.Model.Attributes;
+#else
+using MediaBrowser.Model.Plugins;
 #endif
 
 namespace Emby.SubtitleCat;
@@ -16,7 +18,7 @@ public class PluginConfiguration : EditableOptionsBase
 {
     public override string EditorTitle => "SubtitleCat 字幕";
 #else
-public class PluginConfiguration
+public class PluginConfiguration : BasePluginConfiguration
 {
 #endif
     [DisplayName("首选语言顺序")]
