@@ -178,7 +178,9 @@ public static class SubtitleFetcher
 #if __EMBY__
             var streams = item.MediaStreams;
 #else
-            var streams = (item as Video)?.MediaStreams;
+            var streams = item.GetMediaSources(false)
+                .SelectMany(s => s.MediaStreams ?? Array.Empty<MediaStream>())
+                .ToList();
 #endif
             if (streams is null)
             {
