@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>SubtitleCat</title>
+</head>
+
+<body>
+<div id="SubtitleCatConfigPage" data-role="page"
+     class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+
+            <h1>SubtitleCat</h1>
+
+            <div class="readOnlyContent">
+                <p class="description1">
+                    按番号从 subtitlecat.com 搜索并下载中文字幕。自动下载与全库扫描只处理带 MetaTube
+                    ProviderId 的条目，下载完成后可复用 MetaTube 的图片角标接口。
+                </p>
+            </div>
+
+            <form id="SubtitleCatConfigForm">
+
+                <div class="verticalSection">
+                    <h2>搜索</h2>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtPreferredLanguages">首选语言顺序</label>
+                        <input id="txtPreferredLanguages" is="emby-input" type="text"/>
+                        <div class="fieldDescription">按优先级排列，用英文逗号分隔，可选 zh-CN、zh-TW、zh、en，默认 zh-CN,zh-TW,en。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="numMaxResults">最多返回条数</label>
+                        <input id="numMaxResults" is="emby-input" type="number" min="1" max="50"/>
+                        <div class="fieldDescription">单次搜索最多返回的字幕条数，范围 1~50。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="numMaxCandidates">最多检查的候选结果</label>
+                        <input id="numMaxCandidates" is="emby-input" type="number" min="1" max="50"/>
+                        <div class="fieldDescription">每个候选需请求详情页，数值越大越全但越慢。</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkStrictNumberMatch" is="emby-checkbox" type="checkbox"/>
+                            <span>只返回番号匹配的结果</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">标题必须包含该番号，避免刮到同名系列。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtProxyUrl">代理地址</label>
+                        <input id="txtProxyUrl" is="emby-input" type="text"/>
+                        <div class="fieldDescription">例如 http://127.0.0.1:7890，留空使用系统默认代理。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="numTimeoutSeconds">请求超时（秒）</label>
+                        <input id="numTimeoutSeconds" is="emby-input" type="number" min="5"/>
+                        <div class="fieldDescription">单次 HTTP 请求超时，默认 20 秒。</div>
+                    </div>
+                </div>
+
+                <div class="verticalSection">
+                    <h2>自动下载</h2>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkEnableAutoDownload" is="emby-checkbox" type="checkbox"/>
+                            <span>启用自动下载（新入库）</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">MetaTube 刮削成功后自动抓取字幕，需在媒体库中启用 SubtitleCat 字幕下载器。</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkFullScanOnlyMetaTube" is="emby-checkbox" type="checkbox"/>
+                            <span>全库扫描只处理 MetaTube 条目</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">避免普通影片被误识别，默认开启。</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkSkipWhenExternalSubtitleExists" is="emby-checkbox" type="checkbox"/>
+                            <span>已有外挂字幕时跳过</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">同目录已有 srt/ass/ssa/sub/vtt 时跳过。</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkRefreshMediaInfoAfterDownload" is="emby-checkbox" type="checkbox"/>
+                            <span>下载后刷新媒体信息</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">让外挂字幕挂载到媒体信息中。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtEmbeddedChineseKeywords">内嵌中文字幕关键字</label>
+                        <input id="txtEmbeddedChineseKeywords" is="emby-input" type="text"/>
+                        <div class="fieldDescription">命中即视为已内嵌并跳过，英文逗号分隔。</div>
+                    </div>
+                </div>
+
+                <div class="verticalSection">
+                    <h2>后处理</h2>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkPreferSimplified" is="emby-checkbox" type="checkbox"/>
+                            <span>优先简体</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">繁体字幕自动转简体。</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkStripWatermarks" is="emby-checkbox" type="checkbox"/>
+                            <span>清洗水印与广告</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">删除字幕中的站点水印与广告行。</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="chkEnableTranslation" is="emby-checkbox" type="checkbox"/>
+                            <span>启用字幕翻译</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">没有中文时下载英文/日文字幕并用 Google 翻译。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtTranslateTargetLanguage">翻译目标语言</label>
+                        <input id="txtTranslateTargetLanguage" is="emby-input" type="text"/>
+                        <div class="fieldDescription">Google 翻译目标语言代码，默认 zh-CN。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtTranslationEndpoint">翻译接口地址</label>
+                        <input id="txtTranslationEndpoint" is="emby-input" type="text"/>
+                        <div class="fieldDescription">Google 通用翻译接口。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtTranslationProxyUrl">翻译专用代理</label>
+                        <input id="txtTranslationProxyUrl" is="emby-input" type="text"/>
+                        <div class="fieldDescription">留空时沿用上面的代理地址。</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="numTranslationTimeoutSeconds">翻译请求超时（秒）</label>
+                        <input id="numTranslationTimeoutSeconds" is="emby-input" type="number" min="5"/>
+                        <div class="fieldDescription">字幕较长时会分批请求，默认 60 秒。</div>
+                    </div>
+                </div>
+
+                <div>
+                    <button is="emby-button" type="submit" class="raised button-submit block">
+                        <span>保存</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            var pluginId = 'b7f2c5d1-3a4e-4b6f-9c8d-2e1f0a3b4c5d';
+
+            function el(id) {
+                return document.querySelector('#' + id);
+            }
+
+            function load(config) {
+                el('txtPreferredLanguages').value = config.PreferredLanguages || '';
+                el('numMaxResults').value = config.MaxResults || 20;
+                el('numMaxCandidates').value = config.MaxCandidates || 8;
+                el('chkStrictNumberMatch').checked = config.StrictNumberMatch !== false;
+                el('txtProxyUrl').value = config.ProxyUrl || '';
+                el('numTimeoutSeconds').value = config.TimeoutSeconds || 20;
+                el('chkEnableAutoDownload').checked = config.EnableAutoDownload === true;
+                el('chkFullScanOnlyMetaTube').checked = config.FullScanOnlyMetaTube !== false;
+                el('chkSkipWhenExternalSubtitleExists').checked = config.SkipWhenExternalSubtitleExists !== false;
+                el('chkRefreshMediaInfoAfterDownload').checked = config.RefreshMediaInfoAfterDownload !== false;
+                el('txtEmbeddedChineseKeywords').value = config.EmbeddedChineseKeywords || '';
+                el('chkPreferSimplified').checked = config.PreferSimplified !== false;
+                el('chkStripWatermarks').checked = config.StripWatermarks !== false;
+                el('chkEnableTranslation').checked = config.EnableTranslation !== false;
+                el('txtTranslateTargetLanguage').value = config.TranslateTargetLanguage || 'zh-CN';
+                el('txtTranslationEndpoint').value = config.TranslationEndpoint || '';
+                el('txtTranslationProxyUrl').value = config.TranslationProxyUrl || '';
+                el('numTranslationTimeoutSeconds').value = config.TranslationTimeoutSeconds || 60;
+            }
+
+            function store(config) {
+                config.PreferredLanguages = el('txtPreferredLanguages').value;
+                config.MaxResults = parseInt(el('numMaxResults').value, 10) || 20;
+                config.MaxCandidates = parseInt(el('numMaxCandidates').value, 10) || 8;
+                config.StrictNumberMatch = el('chkStrictNumberMatch').checked;
+                config.ProxyUrl = el('txtProxyUrl').value;
+                config.TimeoutSeconds = parseInt(el('numTimeoutSeconds').value, 10) || 20;
+                config.EnableAutoDownload = el('chkEnableAutoDownload').checked;
+                config.FullScanOnlyMetaTube = el('chkFullScanOnlyMetaTube').checked;
+                config.SkipWhenExternalSubtitleExists = el('chkSkipWhenExternalSubtitleExists').checked;
+                config.RefreshMediaInfoAfterDownload = el('chkRefreshMediaInfoAfterDownload').checked;
+                config.EmbeddedChineseKeywords = el('txtEmbeddedChineseKeywords').value;
+                config.PreferSimplified = el('chkPreferSimplified').checked;
+                config.StripWatermarks = el('chkStripWatermarks').checked;
+                config.EnableTranslation = el('chkEnableTranslation').checked;
+                config.TranslateTargetLanguage = el('txtTranslateTargetLanguage').value;
+                config.TranslationEndpoint = el('txtTranslationEndpoint').value;
+                config.TranslationProxyUrl = el('txtTranslationProxyUrl').value;
+                config.TranslationTimeoutSeconds = parseInt(el('numTranslationTimeoutSeconds').value, 10) || 60;
+                return config;
+            }
+
+            $('#SubtitleCatConfigPage').on('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    load(config);
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+            $('#SubtitleCatConfigForm').on('submit', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    ApiClient.updatePluginConfiguration(pluginId, store(config))
+                        .then(Dashboard.processPluginConfigurationUpdateResult);
+                });
+                return false;
+            });
+        })();
+    </script>
+</div>
+</body>
+
+</html>

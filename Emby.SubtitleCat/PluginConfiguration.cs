@@ -1,16 +1,24 @@
 using System.ComponentModel;
+
+#if __EMBY__
 using Emby.Web.GenericEdit;
 using MediaBrowser.Model.Attributes;
+#endif
 
 namespace Emby.SubtitleCat;
 
 /// <summary>
-/// 插件配置。Emby 会依据下列特性自动生成设置界面。
+/// 插件配置。Emby 会依据下列特性自动生成设置界面；Jellyfin 由 configPage.html 编辑，
+/// 属性名必须与页面中的字段名保持一致。
 /// </summary>
+#if __EMBY__
 public class PluginConfiguration : EditableOptionsBase
 {
     public override string EditorTitle => "SubtitleCat 字幕";
-
+#else
+public class PluginConfiguration
+{
+#endif
     [DisplayName("首选语言顺序")]
     [Description("按优先级排列，用英文逗号分隔，可选 zh-CN、zh-TW、zh、en。默认 zh-CN,zh-TW,en")]
     public string PreferredLanguages { get; set; } = "zh-CN,zh-TW,en";

@@ -10,7 +10,9 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.IO;
-using MediaBrowser.Model.Logging;
+#if !__EMBY__
+using MediaBrowser.Model.Configuration;
+#endif
 
 namespace Emby.SubtitleCat;
 
@@ -212,13 +214,19 @@ public static class SubtitleFetcher
         }
     }
 
-    /// <summary>刷新条目媒体信息，让新写入的字幕被 Emby 识别。</summary>
+    /// <summary>刷新条目媒体信息，让新写入的字幕被服务端识别。</summary>
+#if __EMBY__
     public static async Task RefreshMediaInfoAsync(BaseItem item, ILibraryManager libraryManager,
-        IProviderManager providerManager, IFileSystem fileSystem, ILogger logger, CancellationToken cancellationToken)
+        IProviderManager providerManager, IFileSystem fileSystem, PluginLogger logger, CancellationToken cancellationToken)
+#else
+    public static async Task RefreshMediaInfoAsync(BaseItem item, ILibraryManager libraryManager,
+        IProviderManager providerManager, IDirectoryService directoryService, PluginLogger logger,
+        CancellationToken cancellationToken)
+#endif
     {
         try
         {
-            // Emby 只在视频文件修改时间变化时才重新扫描同目录的外挂字幕，
+            // 服务端只在视频文件修改时间变化时才重新扫描同目录的外挂字幕，
             // 写完 .chi.srt 后把视频 mtime 推到当前时间，否则刷新也不会挂载字幕。
             if (!string.IsNullOrWhiteSpace(item.Path))
             {
@@ -232,6 +240,7 @@ public static class SubtitleFetcher
                 }
             }
 
+#if __EMBY__
             var options = new MetadataRefreshOptions(fileSystem)
             {
                 EnableRemoteContentProbe = true,
@@ -242,6 +251,16 @@ public static class SubtitleFetcher
             var libraryOptions = libraryManager.GetLibraryOptions(item);
             await providerManager.RefreshSingleItem(item, options, null, libraryOptions, cancellationToken)
                 .ConfigureAwait(false);
+#else
+            var options = new MetadataRefreshOptions(directoryService)
+            {
+                EnableRemoteContentProbe = true,
+                MetadataRefreshMode = MetadataRefreshMode.Default
+            };
+
+            await providerManager.RefreshSingleItem(item, options, cancellationToken)
+                .ConfigureAwait(false);
+#endif
             logger.Info("SubtitleCat: 已刷新媒体信息 {0}", item.Name);
         }
         catch (OperationCanceledException)

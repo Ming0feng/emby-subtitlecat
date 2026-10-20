@@ -18,7 +18,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: |
+            6.0.x
+            9.0.x
 
       - name: Resolve version
         id: ver
@@ -32,25 +34,36 @@ jobs:
             echo "version=$v" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build
+      - name: Build Jellyfin
         run: |
           dotnet publish Emby.SubtitleCat/Emby.SubtitleCat.csproj \
             --configuration Release \
             -p:Version=${{ steps.ver.outputs.version }} \
             -p:ContinuousIntegrationBuild=true \
-            --output out
+            --output out-jellyfin
+
+      - name: Build Emby
+        run: |
+          dotnet publish Emby.SubtitleCat/Emby.SubtitleCat.csproj \
+            --configuration Release.Emby \
+            -p:Version=${{ steps.ver.outputs.version }} \
+            -p:ContinuousIntegrationBuild=true \
+            --output out-emby
 
       - name: Package
         run: |
           mkdir -p dist
+          zip -j "dist/Jellyfin.SubtitleCat_${{ steps.ver.outputs.version }}.zip" \
+            out-jellyfin/Jellyfin.SubtitleCat.dll \
+            out-jellyfin/Jellyfin.SubtitleCat.pdb
           zip -j "dist/Emby.SubtitleCat_${{ steps.ver.outputs.version }}.zip" \
-            out/Emby.SubtitleCat.dll \
-            out/Emby.SubtitleCat.pdb
+            out-emby/Emby.SubtitleCat.dll \
+            out-emby/Emby.SubtitleCat.pdb
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Emby.SubtitleCat_${{ steps.ver.outputs.version }}
+          name: SubtitleCat_${{ steps.ver.outputs.version }}
           path: dist/*.zip
 
       - name: Publish release
@@ -58,6 +71,6 @@ jobs:
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
           name: ${{ steps.ver.outputs.tag }}
-          files: dist/Emby.SubtitleCat_*.zip
+          files: dist/*.zip
           generate_release_notes: true
           fail_on_unmatched_files: true

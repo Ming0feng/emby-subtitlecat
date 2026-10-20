@@ -8,7 +8,6 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Configuration;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.Logging;
 
 namespace Emby.SubtitleCat;
 
@@ -22,7 +21,7 @@ public static class LibraryDefaults
     private const string ProviderName = "SubtitleCat";
     private const string StateFileName = "Emby.SubtitleCat.libraries.json";
 
-    public static void Apply(ILibraryManager libraryManager, IApplicationPaths applicationPaths, ILogger logger)
+    public static void Apply(ILibraryManager libraryManager, IApplicationPaths applicationPaths, PluginLogger logger)
     {
         try
         {
@@ -34,7 +33,7 @@ public static class LibraryDefaults
         }
     }
 
-    private static void ApplyCore(ILibraryManager libraryManager, IApplicationPaths applicationPaths, ILogger logger)
+    private static void ApplyCore(ILibraryManager libraryManager, IApplicationPaths applicationPaths, PluginLogger logger)
     {
         var directory = applicationPaths.PluginConfigurationsPath;
         if (string.IsNullOrWhiteSpace(directory))
@@ -102,7 +101,7 @@ public static class LibraryDefaults
         }
     }
 
-    private static bool Disable(ILibraryManager libraryManager, VirtualFolderInfo folder, ILogger logger)
+    private static bool Disable(ILibraryManager libraryManager, VirtualFolderInfo folder, PluginLogger logger)
     {
         var options = folder.LibraryOptions ?? new LibraryOptions();
         var disabled = (options.DisabledSubtitleFetchers ?? Array.Empty<string>()).ToList();

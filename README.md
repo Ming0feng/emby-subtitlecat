@@ -1,16 +1,17 @@
-# Emby.SubtitleCat
+# SubtitleCat for Emby / Jellyfin
 
-按番号从 [subtitlecat.com](https://subtitlecat.com) 搜索并下载中文字幕的 Emby 插件。
+按番号从 [subtitlecat.com](https://subtitlecat.com) 搜索并下载中文字幕的 Emby / Jellyfin 插件。
 
 插件会把「番号提取 → 字幕搜索 → 语言筛选 → 清洗/转简体/翻译 → 写入同目录 srt → 刷新挂载」整条链路自动化，并与 MetaTube 刮削结果联动。
 
-![version](https://img.shields.io/badge/version-1.1.0.0-blue)
-![framework](https://img.shields.io/badge/.NET-net6.0-purple)
+![version](https://img.shields.io/badge/version-1.2.0.0-blue)
+![framework](https://img.shields.io/badge/.NET-net6.0%20%7C%20net9.0-purple)
 ![emby](https://img.shields.io/badge/Emby-4.8%20%7C%204.9-green)
+![jellyfin](https://img.shields.io/badge/Jellyfin-10.11.x-00A4DC)
 
 ## 功能
 
-- **字幕提供程序**：在 Emby 的字幕搜索里按番号检索 SubtitleCat，返回按语言优先级排序的结果。
+- **字幕提供程序**：在 Emby / Jellyfin 的字幕搜索里按番号检索 SubtitleCat，返回按语言优先级排序的结果。
 - **新片自动下载**：媒体库有新片入库且 MetaTube 刮削成功后，自动抓取中文字幕（默认关闭）。
 - **全库扫描**：计划任务遍历电影库，为缺失中文字幕的条目批量补齐。
 - **语言优先级**：默认 `zh-CN,zh-TW,en`，简体优先，其次繁体，最后英文。
@@ -21,7 +22,7 @@
 - **外挂字幕去重**：同目录已存在 `srt/ass/ssa/sub/vtt` 时跳过。
 - **水印清洗**：删除字幕中的站点水印与广告行（如 `whisperJAV`、`hhd800.com`）。
 - **角标联动**：下载成功后复用 MetaTube 的图片角标能力，为主图补上「中文字幕」角标。
-- **媒体库默认关闭**：Emby 安装新字幕提供程序时会默认全库启用，插件反向处理为默认关闭，需手动勾选后才生效。
+- **媒体库默认关闭**（仅 Emby）：Emby 安装新字幕提供程序时会默认全库启用，插件反向处理为默认关闭，需手动勾选后才生效。Jellyfin 不会自动全库启用，因此不做该处理。
 
 ## 工作流程
 
@@ -46,7 +47,27 @@ SubtitleCat 搜索 → 严格番号过滤 → 取详情页各语言变体
 
 ## 安装
 
-1. 从 [Releases](https://github.com/Ming0feng/emby-subtitlecat/releases) 下载最新的 `Emby.SubtitleCat_x.x.x.x.zip`。
+发布包按平台区分，选对应的 zip：
+
+| 平台 | 发布包 | 目标框架 |
+| --- | --- | --- |
+| Jellyfin 10.11.x | `Jellyfin.SubtitleCat_x.x.x.x.zip` | net9.0 |
+| Emby 4.8 / 4.9 | `Emby.SubtitleCat_x.x.x.x.zip` | net6.0 |
+
+### Jellyfin
+
+1. 从 [Releases](https://github.com/Ming0feng/emby-subtitlecat/releases) 下载最新的 `Jellyfin.SubtitleCat_x.x.x.x.zip`。
+2. 解压到 Jellyfin 插件目录（目录名需与插件名一致）：
+   - macOS / Linux：`~/.config/jellyfin/plugins/SubtitleCat/`
+   - Windows：`%LOCALAPPDATA%\jellyfin\plugins\SubtitleCat\`
+   - Docker：映射到容器内 `/config/plugins/SubtitleCat/`
+3. 重启 Jellyfin。
+4. 进入 **控制台 → 插件 → SubtitleCat** 完成配置。
+5. 进入每个电影媒体库的 **元数据 → 字幕下载器**，勾选 `SubtitleCat`。
+
+### Emby
+
+1. 下载最新的 `Emby.SubtitleCat_x.x.x.x.zip`。
 2. 解压到 Emby 插件目录：
    - macOS / Linux：`~/.config/emby-server/plugins/`
    - Windows：`%AppData%\Emby-Server\programdata\plugins\`
@@ -56,6 +77,8 @@ SubtitleCat 搜索 → 严格番号过滤 → 取详情页各语言变体
 5. 进入每个电影媒体库的 **元数据 → 字幕下载器**，勾选 `SubtitleCat`。
 
 ## 配置
+
+Jellyfin 在 **控制台 → 插件 → SubtitleCat** 的内嵌页面配置，Emby 在自动生成的设置页配置，两者字段与默认值一致。
 
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
@@ -104,13 +127,17 @@ SubtitleCat 搜索 → 严格番号过滤 → 取详情页各语言变体
 
 ## 构建
 
-需要 .NET 6 或更高版本的 SDK。
+需要 .NET 9 SDK（同时可构建 net6.0 目标）。
 
 ```bash
-dotnet publish Emby.SubtitleCat/Emby.SubtitleCat.csproj -c Release -o out
+# Jellyfin 版（net9.0）
+dotnet publish Emby.SubtitleCat/Emby.SubtitleCat.csproj -c Release -o out-jellyfin
+
+# Emby 版（net6.0）
+dotnet publish Emby.SubtitleCat/Emby.SubtitleCat.csproj -c Release.Emby -o out-emby
 ```
 
-产物为 `out/Emby.SubtitleCat.dll`，连同 `Emby.SubtitleCat.pdb` 打包成 zip 即可分发。
+产物分别为 `Jellyfin.SubtitleCat.dll` 与 `Emby.SubtitleCat.dll`，连同对应 `.pdb` 打包成 zip 即可分发。两种配置由 `Emby.SubtitleCat.csproj` 的 `Release` / `Release.Emby` 区分，源码通过 `__EMBY__` 条件编译共用。
 
 ## 联动项目
 
@@ -133,9 +160,10 @@ dotnet publish Emby.SubtitleCat/Emby.SubtitleCat.csproj -c Release -o out
 
 ## 兼容性
 
-- 目标框架：`net6.0`（Emby 4.8 / 4.9 运行时为 .NET 6）
-- 依赖：`MediaBrowser.Server.Core` / `MediaBrowser.Common` 4.9.1.90（`ExcludeAssets="runtime"`，不随包分发）
+- 目标框架：`net9.0`（Jellyfin 10.11.x）、`net6.0`（Emby 4.8 / 4.9）
+- 依赖：Jellyfin 版 `Jellyfin.Controller` / `Jellyfin.Model` 10.11.0；Emby 版 `MediaBrowser.Server.Core` / `MediaBrowser.Common` 4.9.1.90（`ExcludeAssets="runtime"`，不随包分发）
 - 字幕来源：subtitlecat.com，仅支持电影（`VideoContentType.Movie`）
+- Jellyfin 版没有 Emby 的 `IServerEntryPoint`，改用 `IHostedService` + `IPluginServiceRegistrator` 注册新片监听服务；配置页为内嵌 HTML
 
 ## 说明
 

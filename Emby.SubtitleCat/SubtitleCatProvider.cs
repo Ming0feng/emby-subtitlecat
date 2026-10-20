@@ -82,7 +82,11 @@ public class SubtitleCatProvider : ISubtitleProvider
                     ProviderName = Name,
                     Author = "subtitlecat.com",
                     Format = "srt",
+#if __EMBY__
                     Language = variant.LanguageTag,
+#else
+                    ThreeLetterISOLanguageName = variant.LanguageTag,
+#endif
                     DownloadCount = candidate.DownloadCount,
                     DateCreated = DateTime.UtcNow
                 }, langIndex, candidate.DownloadCount));

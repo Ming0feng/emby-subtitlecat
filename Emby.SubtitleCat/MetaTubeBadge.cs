@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.Logging;
 
 namespace Emby.SubtitleCat;
 
@@ -21,8 +22,8 @@ public static class MetaTubeBadge
     private const string ChineseSubtitleGenre = "中文字幕";
 
     /// <summary>为条目补上中文字幕角标；已带角标或 MetaTube 未启用时不处理。</summary>
-    public static bool Apply(BaseItem item, ILibraryManager libraryManager, IApplicationPaths applicationPaths,
-        ILogger logger)
+    public static async Task<bool> Apply(BaseItem item, ILibraryManager libraryManager,
+        IApplicationPaths applicationPaths, PluginLogger logger)
     {
         try
         {
@@ -65,7 +66,12 @@ public static class MetaTubeBadge
                 item.Genres = genres.ToArray();
             }
 
+#if __EMBY__
             libraryManager.UpdateItem(item, item, ItemUpdateType.MetadataEdit, null);
+#else
+            await libraryManager.UpdateItemAsync(item, item, ItemUpdateType.MetadataEdit, CancellationToken.None)
+                .ConfigureAwait(false);
+#endif
             logger.Info("SubtitleCat: 已为 {0} 更新角标 {1}", item.Name, badge);
 
             // Emby 在“保存图片到媒体文件夹”模式下会把远端主图落盘成 poster.jpg，
@@ -85,7 +91,7 @@ public static class MetaTubeBadge
     /// <summary>
     /// 删除与媒体同目录、由 Emby 落盘的旧 poster 图，避免它带着旧角标盖掉新角标。
     /// </summary>
-    private static void RemoveStalePoster(string? imagePath, string? mediaPath, ILogger logger)
+    private static void RemoveStalePoster(string? imagePath, string? mediaPath, PluginLogger logger)
     {
         if (string.IsNullOrWhiteSpace(imagePath)
             || imagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
