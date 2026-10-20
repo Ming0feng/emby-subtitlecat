@@ -175,7 +175,11 @@ public static class SubtitleFetcher
     {
         try
         {
+#if __EMBY__
             var streams = item.MediaStreams;
+#else
+            var streams = (item as Video)?.MediaStreams;
+#endif
             if (streams is null)
             {
                 return false;

@@ -40,7 +40,7 @@ public class AutoSubtitleService : IHostedService, IDisposable
     private readonly PluginLogger _logger;
 
     private readonly SemaphoreSlim _throttle = new(2, 2);
-    private readonly ConcurrentDictionary<long, byte> _pending = new();
+    private readonly ConcurrentDictionary<string, byte> _pending = new();
 
 #if __EMBY__
     public AutoSubtitleService(ILibraryManager libraryManager, IProviderManager providerManager,
@@ -142,7 +142,7 @@ public class AutoSubtitleService : IHostedService, IDisposable
                 return;
             }
 
-            if (!_pending.TryAdd(item.InternalId, 0))
+            if (!_pending.TryAdd(item.Id.ToString(), 0))
             {
                 return; // 正在处理
             }
@@ -160,7 +160,7 @@ public class AutoSubtitleService : IHostedService, IDisposable
                 }
                 finally
                 {
-                    _pending.TryRemove(item.InternalId, out _);
+                    _pending.TryRemove(item.Id.ToString(), out _);
                     _throttle.Release();
                 }
             });

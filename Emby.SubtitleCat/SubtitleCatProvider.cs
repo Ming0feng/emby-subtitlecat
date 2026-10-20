@@ -94,7 +94,7 @@ public class SubtitleCatProvider : ISubtitleProvider
         }
 
         return results
-            .OrderBy(r => LangPriority(r.Info.Language, preferred))
+            .OrderBy(r => LangPriority(GetLanguage(r.Info), preferred))
             .ThenByDescending(r => r.Downloads)
             .Take(Math.Clamp(config.MaxResults, 1, 50))
             .Select(r => r.Info)
@@ -126,6 +126,15 @@ public class SubtitleCatProvider : ISubtitleProvider
             Language = language,
             Stream = new MemoryStream(new UTF8Encoding(false).GetBytes(text))
         };
+    }
+
+    private static string GetLanguage(RemoteSubtitleInfo info)
+    {
+#if __EMBY__
+        return info.Language;
+#else
+        return info.ThreeLetterISOLanguageName;
+#endif
     }
 
     private static int LangPriority(string language, List<string> preferred)

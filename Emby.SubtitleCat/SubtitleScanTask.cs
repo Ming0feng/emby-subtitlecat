@@ -103,7 +103,7 @@ public class SubtitleScanTask : IScheduledTask
             IsFolder = false
         };
 
-        var items = _libraryManager.GetItemList(query, cancellationToken)
+        var items = _libraryManager.GetItemList(query)
             .OfType<Movie>()
             .Where(i => i.LocationType == LocationType.FileSystem)
             .Where(i => !string.IsNullOrWhiteSpace(i.Path))
