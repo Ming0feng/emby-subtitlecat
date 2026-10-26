@@ -12,7 +12,7 @@ namespace Emby.SubtitleCat;
 public static class SubtitleSanitizer
 {
     private static readonly Regex WatermarkRegex = new(
-        @"(?i)(whisper\s*jav|耳語\s*jav|耳语\s*jav|hhd800\.com|subtitlecat|subscene|opensubtitles|advertis|字幕由.{0,12}(提供|制作)|更多字幕|下载字幕|www\.[a-z0-9\-]+\.(com|net|org|xyz|cc))",
+        @"(?i)(whisper\s*jav|耳語\s*jav|耳语\s*jav|hhd800\.com|98堂|98t\.la|subtitlecat|subscene|opensubtitles|advertis|字幕由.{0,12}(提供|制作)|更多字幕|下载字幕|www\.[a-z0-9\-]+\.(com|net|org|xyz|cc))",
         RegexOptions.Compiled);
 
     private static readonly Regex TimeLineRegex = new(

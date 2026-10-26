@@ -6,7 +6,9 @@ namespace Emby.SubtitleCat;
 /// <summary>从文件名/条目名中提取番号，例如 hhd800.com@SSIS-033-C.mp4 → SSIS-033。</summary>
 public static class SubtitleNumber
 {
-    private static readonly Regex Fc2Regex = new(@"(?i)FC2[-_ ]?PPV[-_ ]?(?<n>\d{4,9})", RegexOptions.Compiled);
+    // PPV 段可选：既要匹配 FC2-PPV-3079302 / FC2PPV3079302，也要匹配 FC2-3079302。
+    // 少了这个可选项时 FC2-3079302 会落到下面的 NumberRegex，被截成 FC2-30793。
+    private static readonly Regex Fc2Regex = new(@"(?i)FC2[-_ ]?(?:PPV[-_ ]?)?(?<n>\d{4,9})", RegexOptions.Compiled);
     private static readonly Regex NumberRegex = new(@"(?<series>[A-Za-z]{2,8})[-_ ]?(?<digits>\d{2,5})", RegexOptions.Compiled);
     private static readonly Regex PrefixRegex = new(@"(?i)^\s*(\[[^\]]*\]|\([^)]*\)|[a-z0-9.\-]+@)", RegexOptions.Compiled);
     private static readonly Regex SuffixRegex = new(

@@ -152,8 +152,13 @@ public static class SubtitleFetcher
                 continue;
             }
 
-            // 简体用 .chs.srt，繁体（未转简体时）用 .cht.srt，Emby 都能识别
+            // Emby 认 .chs/.cht；Jellyfin 不认这两个后缀，识别不到语言，
+            // 必须写成 BCP-47 的 .zh-CN/.zh-TW，否则字幕文件下下来也挂不上语言标记。
+#if __EMBY__
             var languageSuffix = chosen.IsTraditional && !config.PreferSimplified ? ".cht.srt" : ".chs.srt";
+#else
+            var languageSuffix = chosen.IsTraditional && !config.PreferSimplified ? ".zh-TW.srt" : ".zh-CN.srt";
+#endif
             var target = Path.Combine(directory, baseName + languageSuffix);
 
             await File.WriteAllTextAsync(target, text, new UTF8Encoding(false), cancellationToken)
@@ -358,7 +363,13 @@ public static class SubtitleFetcher
                 return false;
             }
 
-            var patterns = new[] { "*.chi.srt", "*.zh.srt", "*.zh-cn.srt", "*.zh-tw.srt", "*.chs.srt", "*.cht.srt" };
+            // 同时保留大小写两种写法：Linux 上 EnumerateFiles 是大小写敏感的
+            var patterns = new[]
+            {
+                "*.chi.srt", "*.zho.srt", "*.zh.srt",
+                "*.zh-cn.srt", "*.zh-CN.srt", "*.zh-tw.srt", "*.zh-TW.srt",
+                "*.chs.srt", "*.cht.srt"
+            };
             foreach (var pattern in patterns)
             {
                 if (Directory.EnumerateFiles(directory, baseName + pattern).Any())

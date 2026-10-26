@@ -15,6 +15,7 @@ using MediaBrowser.Model.Tasks;
 #if __EMBY__
 using MediaBrowser.Model.Logging;
 #else
+using Jellyfin.Data.Enums;
 using Microsoft.Extensions.Logging;
 #endif
 
@@ -100,7 +101,11 @@ public class SubtitleScanTask : IScheduledTask
         var query = new InternalItemsQuery
         {
             Recursive = true,
-            IsFolder = false
+            IsFolder = false,
+            // 必须带上类型过滤：不带 IncludeItemTypes 时 Jellyfin 会把库里所有非文件夹条目
+            // 全部反序列化一遍，遇到一个无法解析的类型就整批抛
+            // "Cannot deserialize unknown type."，扫描直接失败。
+            IncludeItemTypes = new[] { BaseItemKind.Movie }
         };
 
         var items = _libraryManager.GetItemList(query)
