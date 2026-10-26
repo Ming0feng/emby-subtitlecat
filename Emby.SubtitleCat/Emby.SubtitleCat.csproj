@@ -46,6 +46,9 @@
     <ItemGroup Condition="'$(Configuration)'=='Debug.Emby' or '$(Configuration)'=='Release.Emby'">
         <PackageReference Include="MediaBrowser.Server.Core" Version="4.9.1.90" ExcludeAssets="runtime"/>
         <PackageReference Include="MediaBrowser.Common" Version="4.9.1.90" ExcludeAssets="runtime"/>
+        <!-- IHasThumbImage 需要真实资源，否则 /Plugins/{id}/Thumb 返回 500 -->
+        <None Remove="thumb.png"/>
+        <EmbeddedResource Include="thumb.png"/>
     </ItemGroup>
 
     <Target Name="Zip" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='Release.Emby'">

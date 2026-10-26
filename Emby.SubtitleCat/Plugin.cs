@@ -52,7 +52,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 #if __EMBY__
     public ImageFormat ThumbImageFormat => ImageFormat.Png;
 
-    public System.IO.Stream? GetThumbImage() => null;
+    /// <summary>
+    /// 返回内嵌的 thumb.png。之前返回 null，而类仍声明了 IHasThumbImage，
+    /// Emby 请求 /Plugins/{id}/Thumb 时拿不到流，直接 500。
+    /// </summary>
+    public System.IO.Stream? GetThumbImage() =>
+        GetType().Assembly.GetManifestResourceStream("Emby.SubtitleCat.thumb.png");
 #else
     public IEnumerable<PluginPageInfo> GetPages()
     {
